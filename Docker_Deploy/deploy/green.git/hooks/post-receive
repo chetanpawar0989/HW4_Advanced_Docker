@@ -1,0 +1,11 @@
+#!/bin/sh
+
+#GIT_WORK_TREE=$GIT_DIR/../green-www/ git checkout -f
+
+echo "post-receive hook of green slice called"
+docker pull localhost:5000/ncsu:latest
+docker stop green-app
+docker rm green-app
+docker rmi localhost:5000/ncsu:current
+docker tag localhost:5000/ncsu:latest localhost:5000/ncsu:current
+docker run -p 9090:8080 -d --name green-app localhost:5000/ncsu:latest
