@@ -7,7 +7,7 @@ var PORT = args[0];
 
 app.get('/', function(req, res) 
 {
-	res.send("Go green. :D");
+	res.send("Go green again. :D");
     //res.status(500).send('Something broke!');
 });
 
