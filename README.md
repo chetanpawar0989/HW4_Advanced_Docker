@@ -59,7 +59,8 @@ git commit -am 'some commit'
 export ROOT=home/chetanpawar0989/DevOps/HW4_Advanced_Docker/Docker_Deploy/deploy
 git remote add blue "file://$ROOT/blue.git"
 git remote add green "file://$ROOT/green.git"
-
+git push blue master		check on port localhost:8080
+git push green master		check on port localhost:9090
 
 
 
