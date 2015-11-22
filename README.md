@@ -44,7 +44,7 @@ In this homework assignment, you'll get to practice several common architectural
 * Use two different VMs to isolate the docker hosts. VMs can be from vagrant, DO, etc.
 	vagrant init dbit/ubuntu-docker-fig; vagrant up
 * The client should just be performing a simple "set/get" request.
-* In total, there should be 4 containers.
+* In total, there should be 4 containers....
 
 3) **Docker Deploy**: Extend the deployment workshop to run a docker deployment process.
 
