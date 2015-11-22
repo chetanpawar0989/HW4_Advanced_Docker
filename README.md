@@ -53,6 +53,16 @@ In this homework assignment, you'll get to practice several common architectural
 * Deploy the dockerized [simple node.js App](https://github.com/CSC-DevOps/App) to blue or green slice.
 * Add appropriate hook commands to pull from registery, stop, and restart containers.
 
+
+docker run -d -p 5000:5000 --restart=always --name registry registry:2
+git commit -am 'some commit'
+export ROOT=home/chetanpawar0989/DevOps/HW4_Advanced_Docker/Docker_Deploy/deploy
+git remote add blue "file://$ROOT/blue.git"
+git remote add green "file://$ROOT/green.git"
+
+
+
+
 ### Evaluation
 
 * File IO (20%)
