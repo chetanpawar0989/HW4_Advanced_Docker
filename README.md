@@ -76,7 +76,6 @@
 
 * We can see the changes after pushing to respective remots
 	```	
-	git push blue master		# check on port 8080
-			
+	git push blue master		# check on port 8080			
 	git push green master		# check on port 9090	
 	```
