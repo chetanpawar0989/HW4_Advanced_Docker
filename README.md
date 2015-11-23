@@ -59,14 +59,14 @@
 
 	`docker run -d -p 5000:5000 --restart=always --name registry registry:2`
 
-* Whenever any changes are commited [post-commit](./Docker_Deploy/post-commit) hook will build the image with this [dockerfile](./DockerDeploy/Dockerfile). This image will deploy the dockerzed [simple node.js App](https://github.com/CSC-DevOps/App) on port 8080. After that this image will be pushed into local respository within the [post-commit](./Docker_Deploy/post-commit) script only.  
+* Whenever any changes are commited [post-commit](./Docker_Deploy/post-commit) hook will build the image with this [dockerfile](./DockerDeploy/Dockerfile). This image will deploy the dockerzed [simple node.js App](./DockerDeploy/app) on port 8080. After that this image will be pushed into local respository within the [post-commit](./Docker_Deploy/post-commit) script only.
 
 * For blue and green slices we export a variable say ROOT with deployment directory with following command:
 
 	`export ROOT=home/chetanpawar0989/DevOps/HW4_Advanced_Docker/Docker_Deploy/deploy`
 
 * We create folder blue.git and green.git and initialize them with bare repository with commands: `git init --bare`
-blue.git and green.git repos will have their post-receive hooks which would pull the localhost:5000/ncsu:latest image pushed in post-commit and wil run in blue-app and green-app containers respectively with linking their ports 8080 and 9090 respectively.
+[blue.git](./DockerDeploy/blue-post-receive) and [green.git](./DockerDeploy/green-post-receive) repos will have their post-receive hooks which would pull the localhost:5000/ncsu:latest image pushed in post-commit and wil run in blue-app and green-app containers respectively with linking their ports 8080 and 9090 respectively.
 
 * In our source git repository we have added two remote links for the repository, blue and gree using commands:
 	```
