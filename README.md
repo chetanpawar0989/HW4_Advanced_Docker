@@ -1,13 +1,10 @@
 # Homework 4 - Advanced Docker
 
-In this homework assignment, you'll get to practice several common architectural patterns for dealing with multiple docker containers.
+### Demo [video](www.youtube.com)
 
-1) **File IO**: You want to create a container for a legacy application. You succeed, but you need access to a file that the legacy app creates.
+**File IO**: Create a container for a legacy application. Access to a file that the legacy app creates.
 
-* Create a container that runs a command that outputs to a file.
-	
-	I am creating an image called 'legacyimage' from ubuntu:14.04 image, which will echo "This is legacy application" to op.txt. I will be building this image using Dockerfile.
-	Dockerfile contents are as follows:
+* I am creating an image called 'legacyimage' from ubuntu:14.04 image, which will echo "This is legacy application" to op.txt. I will be building this image using Dockerfile. Dockerfile contents are as follows:
 	```
 	from ubuntu:14.04
 	RUN apt-get 		update		
@@ -17,61 +14,69 @@ In this homework assignment, you'll get to practice several common architectural
 	```
 	This image is built by command: `docker build -t legacyimage .`
 
-* Use socat to map file access to read file container and expose over port 9001 (hint can use SYSTEM + cat).
-	
-	This built image is run in container named 'legacyApp', which will read the contents of op.txt created while building an image and put it on port 9001 using following command.
+* This built image is run in container named 'legacyApp', which will read the contents of op.txt created while building an image and put it on port 9001 using following command.
 
 	`docker run -it --rm --name legacyappcontainer legacyimage`
 
-* Use a linked container that access that file over network. The linked container can just use a command such as curl to access data from other container.
-	
-	New linker container is created using docker run command and it is linked to legacyappcontainer by following command.
+* New linker container is created using docker run command and it is linked to legacyappcontainer by following command.
 
 	`docker run -it --rm --name linkercontainer --link legacyappcontainer ubuntu:14.04 /bin/bash`
 
-	This will open up a bash in newly created linkercontainer. We can see the linking with following command in docker host.
+* This will open up a bash in newly created linkercontainer. We can see the linking with following command in docker host.
 
 	`docker inspect -f "{{ .HostConfig.Links }}" linkercontainer`
 
-	Going back to linkercontainer shell, first I need to install curl. Then I will curl to linked legacyApp container and port 9001.
+* Going back to linkercontainer shell, first I need to install curl. Then I will curl to linked legacyApp container and port 9001.
 
 	`curl legacyappcontainer:9001`
 
 
-2) **Ambassador pattern**: Implement the remote ambassador pattern to encapsulate access to a redis container by a container on a different host.
+**Ambassador pattern**: Implement the remote ambassador pattern to encapsulate access to a redis container by a container on a different host.
 
-* Use Docker Compose to configure containers.
-* Use two different VMs to isolate the docker hosts. VMs can be from vagrant, DO, etc.
-	vagrant init dbit/ubuntu-docker-fig; vagrant up
-* The client should just be performing a simple "set/get" request.
-* In total, there should be 4 containers....
+* I have used couple of vagrant machines for this purpose, say Host1 and Host2. Both machines are having docker-compose preinstalled. I am using dbit/ubuntu-docker-fig image from vagrant boxes. So first Host1 is up by running.
+	`vagrant init dbit/ubuntu-docker-fig; vagrant up`
 
-3) **Docker Deploy**: Extend the deployment workshop to run a docker deployment process.
+	![Ambassador pattern](./Ambassador_pattern/ambassador.png)
 
-* A commit will build a new docker image.
-* Push to local registery.
-* Deploy the dockerized [simple node.js App](https://github.com/CSC-DevOps/App) to blue or green slice.
-* Add appropriate hook commands to pull from registery, stop, and restart containers.
+* I have configured Host1 to be exposed on ip address 192.168.33.10 in [vagrantfile](./Ambassador_pattern/Host1/Vagrantfile). Inside this host, [docker-compose](./Ambassador_pattern/Host1/docker-compose.yml) file will run Redis server and redis ambassador image. Redis ambassador is linked to redis server through port `6379:6379` mapping. We run services redis-ambassador and redis-server with docker-compose with following command.
 
+	`sudo docker-compose up -d`
 
-docker run -d -p 5000:5000 --restart=always --name registry registry:2
-git commit -am 'some commit'
-export ROOT=home/chetanpawar0989/DevOps/HW4_Advanced_Docker/Docker_Deploy/deploy
-git remote add blue "file://$ROOT/blue.git"
-git remote add green "file://$ROOT/green.git"
-git push blue master		check on port localhost:8080
-git push green master		check on port localhost:9090
+* Host2 will run its own [docker-compose](./Ambassador_pattern/Host2/docker-compose.yml) file, which will run redis ambassador and redis client. On Host2 we run redis-client which will automatically run redis-ambassador in this host2 with following command.
 
+	`sudo docker-compose run redis_client`
 
+* Now we can see 4 containers running each for following: redis_server, redis_ambassador(Host1), redis_ambassador(Host2) and redis_client
+	We can then get and set key values in redis_server from redis_client.
+	```
+	set somekey "DevOps"
+	get somekey
+	```
 
-### Evaluation
+**Docker Deploy**: Extend the [deployment workshop](https://github.com/CSC-DevOps/Deployment) to run a docker deployment process.
 
-* File IO (20%)
-* Ambassador pattern (40%)
-* Docker Deploy (40%)
+* First we have to run the local registry and map it to port 5000 with following command.
 
-### Submission
+	`docker run -d -p 5000:5000 --restart=always --name registry registry:2`
 
-[Submit a README.md](https://docs.google.com/a/ncsu.edu/forms/d/1oioay5bF5Le7PpuH1VAzxHCSNsOdkTvEqfrymHI1wjk/viewform?usp=send_form#start=invite) with a screencast (or .gif) for each component. Include code/scripts/configuration files in repo.
+* Whenever any changes are commited [post-commit](./Docker_Deploy/post-commit) hook will build the image with this [dockerfile](./DockerDeploy/Dockerfile). This image will deploy the dockerzed [simple node.js App](https://github.com/CSC-DevOps/App) on port 8080. After that this image will be pushed into local respository within the [post-commit](./Docker_Deploy/post-commit) script only.  
 
-Assignment is due, Monday, November 23rd midnight
+* For blue and green slices we export a variable say ROOT with deployment directory with following command:
+
+	`export ROOT=home/chetanpawar0989/DevOps/HW4_Advanced_Docker/Docker_Deploy/deploy`
+
+* We create folder blue.git and green.git and initialize them with bare repository with commands: `git init --bare`
+blue.git and green.git repos will have their post-receive hooks which would pull the localhost:5000/ncsu:latest image pushed in post-commit and wil run in blue-app and green-app containers respectively with linking their ports 8080 and 9090 respectively.
+
+* In our source git repository we have added two remote links for the repository, blue and gree using commands:
+	```
+	git remote add blue "file://$ROOT/blue.git"
+	git remote add green "file://$ROOT/green.git"
+	```
+
+* We can see the changes after pushing to respective remots
+	```	
+	git push blue master		# check on port 8080
+			
+	git push green master		# check on port 9090	
+	```

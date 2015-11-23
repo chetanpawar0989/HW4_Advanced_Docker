@@ -1,0 +1,12 @@
+#!/bin/sh
+
+echo "======================post-commit script of HW4_Adavanced_Docker triggered======================"
+
+echo "======================Building a docker image======================"
+cd $GIT_DIR/../Docker_Deploy
+docker build -t ncsu-app .
+
+echo "======================Pushing this image to local registery======================"
+docker tag -f ncsu-app localhost:5000/ncsu:latest
+docker push localhost:5000/ncsu:latest
+
