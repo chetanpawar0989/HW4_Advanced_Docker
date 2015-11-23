@@ -1,8 +1,8 @@
 # Homework 4 - Advanced Docker
 
-### Demo [video](www.youtube.com)
-
 **File IO**: Create a container for a legacy application. Access to a file that the legacy app creates.
+
+**Task 1 demo [video](https://youtu.be/P4iJBvoanp4)**
 
 * I am creating an image called 'legacyimage' from ubuntu:14.04 image, which will echo "This is legacy application" to op.txt. I will be building this image using [Dockerfile](./File_IO/Dockerfile). Dockerfile contents are as follows:
 	```
@@ -33,6 +33,8 @@
 
 **Ambassador pattern**: Implement the remote ambassador pattern to encapsulate access to a redis container by a container on a different host.
 
+**Task 2 demo [video](https://youtu.be/jVh5VT5LM4s)**
+
 * I have used couple of vagrant machines for this purpose, say Host1 and Host2. Both machines are having docker-compose preinstalled. I am using dbit/ubuntu-docker-fig image from vagrant boxes. So first Host1 is up by running.
 	`vagrant init dbit/ubuntu-docker-fig; vagrant up`
 
@@ -54,6 +56,8 @@
 	```
 
 **Docker Deploy**: Extend the [deployment workshop](https://github.com/CSC-DevOps/Deployment) to run a docker deployment process.
+
+**Task 3 demo [video](https://youtu.be/-OGEHlmTPSM)**
 
 * First we have to run the local registry and map it to port 5000 with following command.
 
